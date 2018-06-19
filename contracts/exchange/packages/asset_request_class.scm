@@ -12,23 +12,16 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(require "contract-base.scm")
-(require "exchange-common.scm")
+(require "exchange_common.scm")
 
 ;; =================================================================
-;; CLASS: asset
+;; CLASS: asset-request
 ;; =================================================================
-(define-class asset-class
+(define-class asset-request-class
   (instance-vars
    (asset-type-id "")
    (count 0)
-   (owner "")
-   (escrow "")))
-
-(define-method asset-class (get-count) count)
-(define-method asset-class (get-owner) owner)
-(define-method asset-class (get-escrow) escrow)
-(define-method asset-class (get-asset-type-id) asset-type-id)
+   (owner "")))
 
 ;; -----------------------------------------------------------------
 ;; NAME:
@@ -37,8 +30,19 @@
 ;;
 ;; PARAMETERS:
 ;; -----------------------------------------------------------------
-(define-method asset-class (serialize-for-signing)
-  (list asset-type-id count owner escrow))
+(define-method asset-request-class (_match-asset-type-id _asset-object)
+  (or (null-string? asset-type-id) (string=? asset-type-id (send _asset-object 'get-asset-type-id))))
+
+(define-method asset-request-class (_match-count _asset-object)
+  (<= count (send _asset-object 'get-count)))
+
+(define-method asset-request-class (_match-owner _asset-object)
+  (or (null-string? owner) (string=? (send _asset-object 'get-owner) owner)))
+
+(define-method asset-request-class (match _asset-object)
+  (and (send self '_match-asset-type-id _asset-object)
+       (send self '_match-count _asset-object)
+       (send self '_match-owner _asset-object)))
 
 ;; -----------------------------------------------------------------
 ;; NAME:
@@ -47,8 +51,8 @@
 ;;
 ;; PARAMETERS:
 ;; -----------------------------------------------------------------
-(define-method asset-class (serialize-for-sending)
-  (list asset-type-id count owner escrow))
+(define-method asset-request-class (serialize)
+  (list asset-type-id count owner))
 
 ;; -----------------------------------------------------------------
 ;; NAME:
@@ -57,11 +61,10 @@
 ;;
 ;; PARAMETERS:
 ;; -----------------------------------------------------------------
-(define-method asset-class (deserialize serialized)
+(define-method asset-request-class (deserialize serialized)
   (instance-set! self 'asset-type-id (nth serialized 0))
-  (instance-set! self 'count (nth serialized 1))
-  (instance-set! self 'owner (nth serialized 2))
-  (instance-set! self 'escrow (nth serialized 3)))
+  (instance-set! self 'count (coerce-number (nth serialized 1)))
+  (instance-set! self 'owner (nth serialized 2)))
 
 ;; -----------------------------------------------------------------
 ;; NAME:
@@ -70,11 +73,7 @@
 ;;
 ;; PARAMETERS:
 ;; -----------------------------------------------------------------
-(define (create-asset asset-type-id counter)
-  (let ((object (make-instance asset-class)))
-    (instance-set! object 'asset-type-id asset-type-id)
-    (instance-set! object 'count (send counter 'get-count))
-    (instance-set! object 'owner (send counter 'get-owner))
-    (if (not (send counter 'is-active?))
-        (instance-set! object 'escrow (send counter 'get-escrow-key)))
+(define (deserialize-asset-request serialized)
+  (let ((object (make-instance asset-request-class)))
+    (send object 'deserialize serialized)
     object))

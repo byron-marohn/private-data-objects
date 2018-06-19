@@ -20,9 +20,9 @@
 ;; Externalized asset: ((value <integer>) (owner <ecdsa verifying key>))
 
 (require "contract-base.scm")
-(require "exchange-common.scm")
-(require "asset-request-class.scm")
-(require "authoritative-asset-class.scm")
+(require "exchange_common.scm")
+(require "asset_request_class.scm")
+(require "authoritative_asset_class.scm")
 
 ;; =================================================================
 ;; CLASS: _exchange
@@ -30,14 +30,14 @@
 (define-class _exchange
   (super-class base-contract)
   (instance-vars
-   (exchange-state 'initialize)         ; initialize, primed, offered, exchanged, cancelled
+   (exchange-state 'created)         ; created, initialized, offered, exchanged, cancelled
    (asset-request-object #f)
    (root-authority-key "")
    (offered-authoritative-asset #f)
    (exchanged-authoritative-asset #f)))
 
 ;; -----------------------------------------------------------------
-;; NAME: prime-exchange
+;; NAME: initialize
 ;;
 ;; DESCRIPTION:
 ;;
@@ -45,13 +45,13 @@
 ;;    _serialized-asset-request -- serialized object of type asset-request-class
 ;;    _root-authority-key -- public key for the requested root of trust
 ;; -----------------------------------------------------------------
-(define-method _exchange (prime-exchange _serialized-asset-request _root-authority-key)
+(define-method _exchange (initialize _serialized-asset-request _root-authority-key)
   (assert (equal? creator (get ':message 'originator)) "only creator may prime the exchange")
-  (assert (eq? exchange-state 'initialize) "exchange has already been primed")
+  (assert (eq? exchange-state 'created) "exchange has already been primed")
 
   (instance-set! self 'asset-request-object (deserialize-asset-request _serialized-asset-request))
   (instance-set! self 'root-authority-key _root-authority-key)
-  (instance-set! self 'exchange-state 'primed)
+  (instance-set! self 'exchange-state 'initialized)
 
   #t)
 
@@ -64,7 +64,7 @@
 ;; -----------------------------------------------------------------
 (define-method _exchange (offer-asset _serialized-authoritative-asset)
   (assert (equal? creator (get ':message 'originator)) "only creator may offer an asset")
-  (assert (eq? exchange-state 'primed) "offered asset has already been recorded")
+  (assert (eq? exchange-state 'initialized) "offered asset has already been recorded")
 
   (let ((object (deserialize-authoritative-asset _serialized-authoritative-asset)))
     (assert (send object 'verify) "unable to verify offered asset authority")
@@ -223,32 +223,32 @@
 ;; the _exchange contract class to ensure that no leakage of methods
 ;; occurs
 ;; =================================================================
-(define-class exchange
+(define-class exchange-contract
   (instance-vars (contract (make-instance _exchange))))
 
-(define-method exchange (prime-exchange _serialized-asset-request _root-authority-key)
-  (send contract 'prime-exchange _serialized-asset-request _root-authority-key))
+(define-method exchange-contract (initialize _serialized-asset-request _root-authority-key)
+  (send contract 'initialize _serialized-asset-request _root-authority-key))
 
-(define-method exchange (offer-asset _serialized-authoritative-asset)
+(define-method exchange-contract (offer-asset _serialized-authoritative-asset)
   (send contract 'offer-asset _serialized-authoritative-asset))
 
-(define-method exchange (cancel-offer)
+(define-method exchange-contract (cancel-offer)
   (send contract 'cancel-offer))
 
-(define-method exchange (examine-offered-asset)
+(define-method exchange-contract (examine-offered-asset)
   (send contract 'examine-offered-asset))
 
-(define-method exchange (examine-requested-asset)
+(define-method exchange-contract (examine-requested-asset)
   (send contract 'examine-requested-asset))
 
-(define-method exchange (exchange-asset _serialized-authoritative-asset)
+(define-method exchange-contract (exchange-asset _serialized-authoritative-asset)
   (send contract 'exchange-asset _serialized-authoritative-asset))
 
-(define-method exchange (claim-exchange)
+(define-method exchange-contract (claim-exchange)
   (send contract 'claim-exchange))
 
-(define-method exchange (claim-offer)
+(define-method exchange-contract (claim-offer)
   (send contract 'claim-offer))
 
-(define-method exchange (get-verifying-key)
+(define-method exchange-contract (get-verifying-key)
   (send contract 'get-public-signing-key))

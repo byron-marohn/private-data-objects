@@ -24,7 +24,7 @@
 ;; =================================================================
 ;; CLASS: asset-type
 ;; =================================================================
-(define-class asset-type
+(define-class asset-type-contract
   (instance-vars
    (asset-type-initialized #f)
    (name "")
@@ -43,7 +43,7 @@
 ;;     description -- extended description, string 256 characters or less
 ;;     link -- URL pointing to location for more information
 ;; -----------------------------------------------------------------
-(define-method asset-type (initialize _name _description _link)
+(define-method asset-type-contract (initialize _name _description _link)
   (assert (or (null? creator) (equal? creator (get ':message 'originator))) "only creator may initialize the type")
   (assert (not asset-type-initialized) "asset type already initialized")
 
@@ -58,18 +58,18 @@
 
   #t)
 
-(define-method asset-type (get-identifier)
+(define-method asset-type-contract (get-identifier)
   (assert asset-type-initialized "asset type not initialized")
   (get ':contract 'id))
 
-(define-method asset-type (get-name)
+(define-method asset-type-contract (get-name)
   (assert asset-type-initialized "asset type not initialized")
   name)
 
-(define-method asset-type (get-description)
+(define-method asset-type-contract (get-description)
   (assert asset-type-initialized "asset type not initialized")
   description)
 
-(define-method asset-type (get-link)
+(define-method asset-type-contract (get-link)
   (assert asset-type-initialized "asset type not initialized")
   link)

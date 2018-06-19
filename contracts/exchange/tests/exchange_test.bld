@@ -19,7 +19,7 @@
 (define package-directories
   '("." "./tests" "./packages" "../packages" "../../common/interpreter/gipsy_scheme/packages"))
 
-(define contract-input "exchange-test.scm")
+(define contract-input "exchange_test.scm")
 (define contract-output (string-append "_" contract-input))
 
 (build-contract contract-output contract-input package-directories)

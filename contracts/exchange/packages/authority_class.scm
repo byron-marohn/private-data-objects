@@ -13,7 +13,7 @@
 ;; limitations under the License.
 
 (require "contract-base.scm")
-(require "exchange-common.scm")
+(require "exchange_common.scm")
 
 ;; =================================================================
 ;; CLASS: authority-class

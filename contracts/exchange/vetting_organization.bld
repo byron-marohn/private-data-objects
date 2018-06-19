@@ -19,7 +19,7 @@
 (define package-directories
   '("." "./packages" "../packages" "../../common/interpreter/gipsy_scheme/packages"))
 
-(define contract-input "asset-type.scm")
+(define contract-input "vetting_organization.scm")
 (define contract-output (string-append "_" contract-input))
 
 (if (member "debug" *args*)

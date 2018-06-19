@@ -19,30 +19,30 @@ ROOTDIR := $(abspath $(SRCDIR)/../..)
 EXTENSIONPATH := $(ROOTDIR)/common/build
 INSTALLDIR = $(CONTRACTHOME)/contracts
 
-CONTRACT_SRC := asset-type.scm exchange.scm issuer.scm vetting-organization.scm
-CONTRACTS := _asset-type.scm _exchange.scm _issuer.scm _vetting-organization.scm
+CONTRACT_SRC := asset_type.scm exchange.scm issuer.scm vetting_organization.scm
+CONTRACTS := _asset_type.scm _exchange.scm _issuer.scm _vetting_organization.scm
 
 PACKAGE_SRC := \
-	packages/asset-class.scm packages/asset-request-class.scm \
-	packages/authoritative-asset-class.scm packages/authority-class.scm \
-	packages/exchange-common.scm packages/ledger-entry.scm
+	packages/asset_class.scm packages/asset_request_class.scm \
+	packages/authoritative_asset_class.scm packages/authority_class.scm \
+	packages/exchange_common.scm packages/ledger_entry.scm
 
-PLUGINS := issuer.py
+PLUGINS := asset_type.py exchange.py issuer.py vetting.py
 
-TESTS := _exchange-test.scm _issuer-test.scm
+TESTS := _exchange_test.scm _issuer_test.scm
 
 all: $(CONTRACTS)
 
 test : $(TESTS)
 
-_exchange-test.scm : tests/exchange-test.bld tests/exchange-test.scm $(CONTRACT_SRC) $(PACKAGE_SRC)
-	LD_LIBRARY_PATH=$(EXTENSIONPATH) tinyscheme -1 tests/exchange-test.bld debug
+_exchange_test.scm : tests/exchange_test.bld tests/exchange_test.scm $(CONTRACT_SRC) $(PACKAGE_SRC)
+	LD_LIBRARY_PATH=$(EXTENSIONPATH) tinyscheme -1 tests/exchange_test.bld debug
 
-_issuer-test.scm : tests/issuer-test.bld tests/issuer-test.scm $(CONTRACT_SRC) $(PACKAGE_SRC)
-	LD_LIBRARY_PATH=$(EXTENSIONPATH) tinyscheme -1 tests/issuer-test.bld debug
+_issuer_test.scm : tests/issuer_test.bld tests/issuer_test.scm $(CONTRACT_SRC) $(PACKAGE_SRC)
+	LD_LIBRARY_PATH=$(EXTENSIONPATH) tinyscheme -1 tests/issuer_test.bld debug
 
-_asset-type.scm : asset-type.bld asset-type.scm $(PACKAGE_SRC)
-	LD_LIBRARY_PATH=$(EXTENSIONPATH) tinyscheme -1 asset-type.bld
+_asset_type.scm : asset_type.bld asset_type.scm $(PACKAGE_SRC)
+	LD_LIBRARY_PATH=$(EXTENSIONPATH) tinyscheme -1 asset_type.bld
 
 _exchange.scm : exchange.bld exchange.scm $(PACKAGE_SRC)
 	LD_LIBRARY_PATH=$(EXTENSIONPATH) tinyscheme -1 exchange.bld
@@ -50,16 +50,16 @@ _exchange.scm : exchange.bld exchange.scm $(PACKAGE_SRC)
 _issuer.scm : issuer.bld issuer.scm $(PACKAGE_SRC)
 	LD_LIBRARY_PATH=$(EXTENSIONPATH) tinyscheme -1 issuer.bld
 
-_vetting-organization.scm : vetting-organization.bld vetting-organization.scm $(PACKAGE_SRC)
-	LD_LIBRARY_PATH=$(EXTENSIONPATH) tinyscheme -1 vetting-organization.bld
+_vetting_organization.scm : vetting_organization.bld vetting_organization.scm $(PACKAGE_SRC)
+	LD_LIBRARY_PATH=$(EXTENSIONPATH) tinyscheme -1 vetting_organization.bld
 
-install : $(CONTRACTS)
+install : $(CONTRACTS) $(PLUGINS)
 	@echo copy $(CONTRACTS) to $(INSTALLDIR)
 	@mkdir -p $(INSTALLDIR)
 	@cp $(CONTRACTS) $(INSTALLDIR)
 	@cp $(PLUGINS) $(INSTALLDIR)
 
 clean :
-	rm -f $(CONTRACTS) $(DEBUGCONTRACTS)
+	rm -f $(CONTRACTS) $(TESTS)
 
 .PHONY : all debug clean install

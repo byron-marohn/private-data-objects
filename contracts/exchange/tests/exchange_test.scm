@@ -17,9 +17,9 @@
 (require "debug.scm")
 (require "contract-base.scm")
 
-(require "asset-type.scm")
+(require "asset_type.scm")
 (require "issuer.scm")
-(require "vetting-organization.scm")
+(require "vetting_organization.scm")
 (require "exchange.scm")
 
 

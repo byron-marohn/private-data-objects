@@ -15,7 +15,7 @@
 ;;
 ;; vetting-organization.scm
 ;;
-;; Define the contract class for an vetting-organization type. This
+;; Define the contract class for an vetting-organization-contract type. This
 ;; is a relatively simple contract that provides a root for building
 ;; trust chains. The expectation is that actual vetting of contracts
 ;; happens interactively though the results are recorded in the
@@ -23,12 +23,14 @@
 
 (require "contract-base.scm")
 (require "key-store.scm")
-(require "exchange-common.scm")
+
+(require "exchange_common.scm")
+(require "authority_class.scm")
 
 ;; =================================================================
 ;; CLASS: asset-type
 ;; =================================================================
-(define-class vetting-organization
+(define-class vetting-organization-contract
   (super-class base-contract)
   (instance-vars
    (initialized #f)
@@ -46,7 +48,7 @@
 ;;     description -- extended description, string 256 characters or less
 ;;     link -- URL pointing to location for more information
 ;; -----------------------------------------------------------------
-(define-method vetting-organization (initialize _asset-type-id)
+(define-method vetting-organization-contract (initialize _asset-type-id)
   (assert (equal? creator (get ':message 'originator)) "only creator may initialize")
   (assert (not initialized) "object already initialized")
 
@@ -63,10 +65,10 @@
 ;; PARAMETERS:
 ;;
 ;; NOTES: we should probably add the pdo information object into the
-;; call making the vetting-organization object a registry for the
+;; call making the vetting-organization-contract object a registry for the
 ;; issuer contract objects
 ;; -----------------------------------------------------------------
-(define-method vetting-organization (add-approved-key _verifying-key )
+(define-method vetting-organization-contract (add-approved-key _verifying-key )
   (assert (equal? creator (get ':message 'originator)) "only creator may add keys")
   (assert initialized "object not initialized")
 
@@ -83,25 +85,7 @@
 ;;
 ;; PARAMETERS:
 ;; -----------------------------------------------------------------
-;; (define-method vetting-organization (get-authority _verifying-key)
-;;   (assert initialized "object not initialized")
-
-;;   (let* ((key (make-key _verifying-key)))
-;;     (assert (send approved-keys 'exists? key) "not authorized")
-
-;;     (let* ((dependencies (list (list (get ':contract 'id) (get ':contract 'state))))
-;;            (expression (list asset-type-id _verifying-key dependencies))
-;;            (signature (send contract-signing-keys 'sign-expression expression)))
-;;       (list dependencies signature))))
-
-;; -----------------------------------------------------------------
-;; NAME: get-authority
-;;
-;; DESCRIPTION:
-;;
-;; PARAMETERS:
-;; -----------------------------------------------------------------
-(define-method vetting-organization (get-authority issuer-verifying-key)
+(define-method vetting-organization-contract (get-authority issuer-verifying-key)
   (assert initialized "object not initialized")
 
   (let ((key (make-key issuer-verifying-key))
@@ -110,5 +94,12 @@
     (let ((auth-object (create-root-authority asset-type-id issuer-verifying-key dependencies contract-signing-keys)))
       (send auth-object 'serialize-for-sending))))
 
-(define-method vetting-organization (get-verifying-key)
+;; -----------------------------------------------------------------
+;; NAME: get-verifying-key
+;;
+;; DESCRIPTION:
+;;
+;; PARAMETERS:
+;; -----------------------------------------------------------------
+(define-method vetting-organization-contract (get-verifying-key)
   (send self 'get-public-signing-key))

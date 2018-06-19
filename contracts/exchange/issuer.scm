@@ -24,12 +24,12 @@
 ;;
 
 (require "contract-base.scm")
-(require "ledger-entry.scm")
 (require "key-store.scm")
 
-(require "exchange-common.scm")
-(require "authority-class.scm")
-(require "authoritative-asset-class.scm")
+(require "exchange_common.scm")
+(require "authority_class.scm")
+(require "authoritative_asset_class.scm")
+(require "ledger_entry.scm")
 
 ;; =================================================================
 ;; CLASS: _issuer
@@ -306,39 +306,39 @@
 ;; the _issuer contract class to ensure that no leakage of methods
 ;; occurs
 ;; =================================================================
-(define-class issuer
+(define-class issuer-contract
   (instance-vars (contract (make-instance _issuer))))
 
-(define-method issuer (initialize asset-type-id serialized-authority)
+(define-method issuer-contract (initialize asset-type-id serialized-authority)
   (send contract 'initialize asset-type-id serialized-authority))
 
-(define-method issuer (issue owner-identity count)
+(define-method issuer-contract (issue owner-identity count)
   (send contract 'issue owner-identity count))
 
-(define-method issuer (get-balance)
+(define-method issuer-contract (get-balance)
   (send contract 'get-balance))
 
-(define-method issuer (transfer new-owner-identity count)
+(define-method issuer-contract (transfer new-owner-identity count)
   (send contract 'transfer new-owner-identity count))
 
-(define-method issuer (escrow escrow-agent-public-key)
+(define-method issuer-contract (escrow escrow-agent-public-key)
   (send contract 'escrow escrow-agent-public-key))
 
-(define-method issuer (escrow-attestation)
+(define-method issuer-contract (escrow-attestation)
   (send contract 'escrow-attestation))
 
-(define-method issuer (disburse dependencies signature)
+(define-method issuer-contract (disburse dependencies signature)
   (send contract 'disburse dependencies signature))
 
-(define-method issuer (claim owner-identity dependencies signature)
+(define-method issuer-contract (claim owner-identity dependencies signature)
   (send contract 'claim owner-identity dependencies signature))
 
-(define-method issuer (get-verifying-key)
+(define-method issuer-contract (get-verifying-key)
   (send contract 'get-public-signing-key))
 
 ;; add a debug method that we can use to examine the ledger
-;; state in the issuer
+;; state in the issuer-contract
 (include-when
  (member "debug" *args*)
- (define-method issuer (dump-ledger)
+ (define-method issuer-contract (dump-ledger)
    (send contract 'dump-ledger)))

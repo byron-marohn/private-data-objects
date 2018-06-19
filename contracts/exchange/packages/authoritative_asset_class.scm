@@ -14,8 +14,8 @@
 
 (require "contract-base.scm")
 
-(require "asset-class.scm")
-(require "authority-class.scm")
+(require "asset_class.scm")
+(require "authority_class.scm")
 
 ;; =================================================================
 ;; CLASS: authoritative-asset-class
