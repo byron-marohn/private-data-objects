@@ -52,21 +52,21 @@
 ;; create the asset type pdo
 ;; -----------------------------------------------------------------
 (use-person vetting)
-(define asset-type-pdo (make-instance asset-type))
+(define asset-type-pdo (make-instance asset-type-contract))
 (send asset-type-pdo 'initialize "blue marbles" "asset type for representing blue marbles" "")
 (define type-identifier (send asset-type-pdo 'get-identifier))
 
 ;; -----------------------------------------------------------------
 ;; -----------------------------------------------------------------
 (use-person vetting)
-(define vetting-pdo (make-instance vetting-organization))
+(define vetting-pdo (make-instance vetting-organization-contract))
 (send vetting-pdo 'initialize type-identifier)
 
 ;; -----------------------------------------------------------------
 ;; create the issuer pdo
 ;; -----------------------------------------------------------------
 (use-person creator)
-(define issuer-pdo (make-instance issuer))
+(define issuer-pdo (make-instance issuer-contract))
 (let ((issuer-verifying-key (send issuer-pdo 'get-verifying-key (use-person* creator))))
   (send vetting-pdo 'add-approved-key issuer-verifying-key (use-person* vetting)))
 

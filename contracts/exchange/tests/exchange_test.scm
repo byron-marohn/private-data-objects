@@ -62,15 +62,15 @@
 ;; set up the blue marble issuer
 ;; -----------------------------------------------------------------
 (use-person blue-vetting)
-(define blue-asset-type-pdo (make-instance asset-type))
+(define blue-asset-type-pdo (make-instance asset-type-contract))
 (send blue-asset-type-pdo 'initialize "blue marbles" "asset type for representing blue marbles" "")
 (define blue-type-identifier (send blue-asset-type-pdo 'get-identifier))
 
-(define blue-vetting-pdo (make-instance vetting-organization))
+(define blue-vetting-pdo (make-instance vetting-organization-contract))
 (send blue-vetting-pdo 'initialize blue-type-identifier)
 
 (use-person blue-issuer)
-(define blue-issuer-pdo (make-instance issuer))
+(define blue-issuer-pdo (make-instance issuer-contract))
 
 (let ((blue-issuer-verifying-key (send blue-issuer-pdo 'get-verifying-key (use-person* blue-issuer))))
   (send blue-vetting-pdo 'add-approved-key blue-issuer-verifying-key (use-person* blue-vetting))
@@ -89,15 +89,15 @@
 ;; set up the red marble issuer
 ;; -----------------------------------------------------------------
 (use-person red-vetting)
-(define red-asset-type-pdo (make-instance asset-type))
+(define red-asset-type-pdo (make-instance asset-type-contract))
 (send red-asset-type-pdo 'initialize "red marbles" "asset type for representing red marbles" "")
 (define red-type-identifier (send red-asset-type-pdo 'get-identifier))
 
-(define red-vetting-pdo (make-instance vetting-organization))
+(define red-vetting-pdo (make-instance vetting-organization-contract))
 (send red-vetting-pdo 'initialize red-type-identifier)
 
 (use-person red-issuer)
-(define red-issuer-pdo (make-instance issuer))
+(define red-issuer-pdo (make-instance issuer-contract))
 
 (let ((red-issuer-verifying-key (send red-issuer-pdo 'get-verifying-key (use-person* red-issuer))))
   (send red-vetting-pdo 'add-approved-key red-issuer-verifying-key (use-person* red-vetting))
@@ -121,7 +121,7 @@
 (use-person alice)
 
 ;; create the exchange contract
-(define exchange-pdo (make-instance exchange))
+(define exchange-pdo (make-instance exchange-contract))
 
 (display "---------- prime exchange and offer asset ----------\n")
 
@@ -129,7 +129,7 @@
 (let ((asset-request (make-instance asset-request-class (asset-type-id red-type-identifier) (count 21))))
   (let ((serialized-request (send asset-request 'serialize))
         (red-vetting-key (send red-vetting-pdo 'get-verifying-key)))
-    (send exchange-pdo 'prime-exchange serialized-request red-vetting-key)))
+    (send exchange-pdo 'initialize serialized-request red-vetting-key)))
 
 ;; escrow the blue marbles that will be offered for exchange
 (assert (send blue-issuer-pdo 'escrow (send exchange-pdo 'get-verifying-key)) "failed to escrow blue marbles")
