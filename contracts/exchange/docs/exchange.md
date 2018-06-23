@@ -87,7 +87,8 @@ different issuers. For example, Alice and Bob (out of band) decide to exchange 1
 100 blue marbles. A fair exchange contract coordinates the exchange of ownership to guarantee that
 both sides recieve their assets (or neither does).
 
-![Figure 1. Simple Fair Exchange Transaction Flow](./exchange_flow.png)
+![](./exchange_flow.png)
+*Figure 1. Simple Fair Exchange Transaction Flow*
 
 Figure 1 shows the flow of transactions that take place in a fair exchange. Each of these steps is
 described below.
@@ -133,7 +134,8 @@ assets). As with the escrow proof, the claim is situated in the context of a par
 commit. That is, the claim is not valid unless the completed state of the exchange object is
 committed to the ledger.
 
-![Figure 2. Fair Exchange Transaction Dependencies](./dependencies.png)
+![](./dependencies.png)
+*Figure 2. Fair Exchange Transaction Dependencies*
 
 ## Asset Type Contract ##
 
@@ -143,14 +145,80 @@ identity; it simply provides a means to say two things are the same or two thing
 That being said, this could be extended in the future into a more robust asset class
 representation or even use this as a means of certifying issuers of a particular asset class.
 
-Properties:
+### State Update Methods ###
 
-* creator -- public key of the contract creator
-* identity -- public key of the contract
+* `(initialize _name _description _link)` -- initialize information about the asset type
+    * `_name` -- a short name (32 characters) for the asset type
+    * `_description` -- an extended description (256 characters)
+    * `_link` -- a URL pointing to additional information (128 characters)
 
-Methods:
+### Immutable Methods ###
 
-* get-identity -- returns the identity of the asset type
+* `(get-creator)` -- returns the ECDSA verifying key of the type's creator
+* `(get-identifier)` -- returns the unique identifier for the type, currently the contract identifier
+* `(get-name)` -- returns the type's short name
+* `(get-description)` -- returns the type's description
+* `(get-link)` -- returns the type's URL
+
+## Vetting Organization Contract ##
+
+The vetting organization contract is a relatively simple contract that
+provides a root for building trust chains of issuers for a particular
+asset type. The expectation is that the actual vetting of asset issuers
+happens interactively. The vetting organization contract provides a
+means of recording decisions to grant authority to asset issuers.
+
+### State Update Methods ###
+
+* `(initialize _asset-type-id)` -- initialize the object with an asset
+type identifier, must be invoked by the object creator
+    * `_asset-type-id` -- the identifier returned by `(get-identifier)`
+      from the asset type contract object
+* `(add-approved-key _issuer-verifying-key)` -- record the decision to approve
+an asset issuer, must be invoked by the object creator
+    * `_issuer-verifying-key` -- the ECDSA verifying key from the asset issuer
+      contract object
+
+### Immutable Methods ###
+
+* `(get-authority _issuer-verifying-key)` -- create a proof of authority
+  for a previously approved issuer, the structure of the proof of
+  authority is described below
+    * `_issuer-verifying-key` -- the ECDSA verifying key from the asset issuer
+      contract object
+
+* `(get-verifying-key)` -- get the ECDSA verifying key for the contract object
+
+### Proof of Authority ###
+
+A proof of authority captures the data necessary to verify a chain of
+trust for a particular asset type. The chain is represented as a tuple:
+`(authorized-key dependencies signature parent-authority)` where:
+
+* `authorized-key` is an ECDSA verifying key that is authorized to issue
+assets. For example, it might be the verifying key from the Blue Marble
+Chapter contract object. The proof of authority implies that a claim of
+issuance or escrow is valid if it is signed by the private key
+corresponding to the `authorized-key`.
+
+* `dependencies` identifies the state of a contract object that
+contextualizes the authority (that is, the state must be committed in
+the ledger for the authorization to be valid). `dependencies` is a list
+of tuples that contain a contract identifier and state hash. The pair
+uniquely identifies a committed state update for the authorizing
+contract object.
+
+* `parent-authority` is either a recursive proof of authority or the ECDSA
+verifying key of the contract object that serves as the root of the
+chain of trust. For example, if the parent authority is a vetting
+organization like the BMPA, then the value of the `parent-authority`
+field would be the verifing key from the BMPA contract
+object. Otherwise, the proof-of-authority object describes the chain of
+authority for the parent.
+
+* The `signature` is created by the parent authority using its ECDSA
+signing key. The `signature` is computed over the asset type identifier,
+the authorized key, and the dependencies.
 
 ## Asset Ledger Contract ##
 

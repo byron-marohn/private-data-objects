@@ -19,7 +19,8 @@
 ;; that is primarily used to create a registered identifier for the
 ;; asset type.
 
-(require "contract-base.scm")
+(define-macro (assert pred . message)
+  `(if (not ,pred) (throw ,@message)))
 
 ;; =================================================================
 ;; CLASS: asset-type
@@ -73,3 +74,5 @@
 (define-method asset-type-contract (get-link)
   (assert asset-type-initialized "asset type not initialized")
   link)
+
+(define-method asset-type-contract (get-creator) creator)
