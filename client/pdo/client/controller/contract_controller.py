@@ -150,10 +150,11 @@ class ContractController(cmd.Cmd) :
         self.state = State(config)
 
         name = self.state.get(['Client', 'Identity'], "")
-        self.prompt = "{0}> ".format(name)
+        self.prompt = "\33[33m{0}> ".format(name)
 
     # -----------------------------------------------------------------
     def precmd(self, line) :
+        sys.stdout.write('\033[0m')
         if self.echo:
             print(line)
 
@@ -246,6 +247,16 @@ class ContractController(cmd.Cmd) :
         print(self.bindings.expand(args))
 
     # -----------------------------------------------------------------
+    def do_clear(self, args) :
+        """
+        clear -- clear terminal buffer
+        """
+        # Clear screen
+        print(chr(27) + "[2J")
+        # Scroll window
+        print(chr(27) + "[H")
+
+    # -----------------------------------------------------------------
     def do_identity(self, args) :
         """
         identity -- set the identity and keys to use for transactions
@@ -259,7 +270,7 @@ class ContractController(cmd.Cmd) :
             parser.add_argument('-f', '--key-file', help='file that contains the private key used for signing', type=str)
             options = parser.parse_args(pargs)
 
-            self.prompt = "{0}> ".format(options.name)
+            self.prompt = "\33[33m{0}> ".format(options.name)
             self.state.set(['Client', 'Identity'], options.name)
             self.state.set(['Key', 'FileName'], "{0}_private.pem".format(options.name))
 
